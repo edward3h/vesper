@@ -37,22 +37,22 @@ echo "James Bond" | convert -font Arial -pointsize 72 -fill white -background bl
 
 ```bash
 # hello world example
-ncat -lk -p 8081 --sh-exec examples/helloworld.sh
+ncat -lk -p 8081 --exec "/bin/bash examples/helloworld.sh"
 
 # json example
-ncat -lk -p 8081 --sh-exec examples/json.sh
+ncat -lk -p 8081 --exec "/bin/bash examples/json.sh"
 
 # image example
-ncat -lk -p 8081 --sh-exec examples/image.sh
+ncat -lk -p 8081 --exec "/bin/bash examples/image.sh"
 
 # pdf example
-ncat -lk -p 8081 --sh-exec examples/pdf.sh
+ncat -lk -p 8081 --exec "/bin/bash examples/pdf.sh"
 
 # file streaming example
-ncat -lk -p 8081 --sh-exec examples/file_stream.sh
+ncat -lk -p 8081 --exec "/bin/bash examples/file_stream.sh"
 
 # router example
-ncat -lk -p 8081 --sh-exec examples/router.sh
+ncat -lk -p 8081 --exec "/bin/bash examples/router.sh"
 ```
 
 ## Examples
@@ -73,7 +73,7 @@ Start the server
 wget http://tiswww.case.edu/php/chet/bash/rose94.pdf
 
 # start the server
-ncat -lk -p 8081 --sh-exec ./examples/router.sh
+ncat -lk -p 8081 --exec "/bin/bash ./examples/router.sh"
 ```
 
 ![vesper cli](assets/vesper_cli.png)
