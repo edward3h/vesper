@@ -1,5 +1,5 @@
 #!/bin/bash
-# run via: ncat -lk -p 8081 --sh-exec ./examples/custom.sh
+# run via: ncat -lk -p 8081 --exec "/bin/bash ./examples/custom.sh"
 
 source "vesper.sh"
 
