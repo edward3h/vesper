@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/bash
 
 StatusContinue=100 # RFC 7231, 6.2.1
 StatusSwitchingProtocols=101 # RFC 7231, 6.2.2
@@ -177,9 +177,12 @@ function fail() {
 HTTP_REQUEST_METHOD=""
 HTTP_REQUEST_URI=""
 HTTP_REQUEST_HTTP_VERSION=""
+HTTP_REQUEST_BODY=""
+HTTP_REQUEST_LENGTH=0
 declare -a HTTP_REQUEST_HEADERS
 
 function http_request() {
+  request_eol='__end_of_request__' # custom string that imposible exist in request body, it literally could be any string
   recv() { echo "< $@" >&2; }
   
   # HTTP RFC 2616 $5.1 request line
@@ -188,10 +191,22 @@ function http_request() {
   # if there is any trailing CR, strip it
   raw=${raw%%$'\r'}
   recv "$raw"
-  read -r HTTP_REQUEST_METHOD HTTP_REQUEST_URI HTTP_REQUEST_HTTP_VERSION <<<"$raw"
+  read -r HTTP_REQUEST_METHOD HTTP_REQUEST_URI HTTP_REQUEST_HTTP_VERSION <<< "$raw"
+  read -r HTTP_REQUEST_URI HTTP_REQUEST_BODY <<< $(echo $HTTP_REQUEST_URI | tr "?" " ")
 
   while read -r raw; do
     raw=${raw%%$'\r'}
+
+    if [[ "$HTTP_REQUEST_METHOD" == "POST" ]]; then
+        if [[ "$raw" == "Content-Length: "** ]]; then
+            HTTP_REQUEST_LENGTH="$(sed 's/Content-Length: //' <<< $raw)"
+        fi
+
+        if [[ "$raw" == "Content-Type: multipart/form-data; boundary="** ]]; then
+            request_eol="$(sed 's/Content-Type: multipart/form-data; boundary=//' <<< $raw)\r\n"
+        fi
+    fi
+
     recv "$raw"
 
     # check if we reached the end of the headers
@@ -199,6 +214,10 @@ function http_request() {
 
     HTTP_REQUEST_HEADERS+=("$raw")
   done
+
+  if [[ "$HTTP_REQUEST_METHOD" == "POST" ]]; then
+    read -n$HTTP_REQUEST_LENGTH -d$request_eol -r HTTP_REQUEST_BODY
+  fi
 }
 
 function file_size() {
